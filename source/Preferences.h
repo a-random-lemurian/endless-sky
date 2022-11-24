@@ -28,6 +28,12 @@ public:
 		adaptive,
 	};
 
+	enum class DateFormat : int {
+		dmy = 0,
+		mdy,
+		ymd
+	};
+
 
 public:
 	static void Load();
@@ -40,6 +46,10 @@ public:
 	// and "always."
 	static void ToggleAmmoUsage();
 	static std::string AmmoUsage();
+
+	// Date format preferences
+	static void ToggleDateFormat();
+	static DateFormat GetDateFormat();
 
 	// Scroll speed preference.
 	static int ScrollSpeed();

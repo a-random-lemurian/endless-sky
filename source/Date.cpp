@@ -14,6 +14,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "Date.h"
+#include "Preferences.h"
 
 using namespace std;
 
@@ -32,6 +33,20 @@ namespace {
 		static const string DAY[] = {"Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"};
 		return DAY[day];
 	}
+
+	string ZeroPad(int i)
+	{
+		string s;
+
+		if(i < 10)
+			s += '0';
+
+		s += to_string(i);
+
+		return s;
+	}
+
+	Preferences::DateFormat dateFormatInUse = Preferences::DateFormat::dmy;
 }
 
 
@@ -49,6 +64,14 @@ Date::Date(int day, int month, int year)
 // Convert a date to a string.
 const string &Date::ToString() const
 {
+	Preferences::DateFormat dateFormat = Preferences::GetDateFormat();
+
+	if(dateFormat != dateFormatInUse)
+	{
+		dateFormatInUse = dateFormat;
+		str.clear();
+	}
+
 	// Because this is a somewhat "costly" operation, cache the result. The
 	// cached value is discarded if the date is changed.
 	if(date && str.empty())
@@ -57,15 +80,18 @@ const string &Date::ToString() const
 		int month = Month();
 		int year = Year();
 
-		str = Weekday(day, month, year);
-		str.append(", ");
-		str.append(to_string(day));
-		str.append(" ");
 		static const string MONTH[] = {
-			"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-		str.append(MONTH[month - 1]);
-		str.append(" ");
-		str.append(to_string(year));
+				"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+
+		string weekday_str = Weekday(day, month, year);
+		string month_str = MONTH[month - 1];
+
+		if(dateFormat == Preferences::DateFormat::ymd)
+			str = to_string(year) + "-" + ZeroPad(month) + "-" + ZeroPad(day);
+		else if(dateFormat == Preferences::DateFormat::mdy)
+			str = weekday_str + " " + month_str + " " + to_string(day) + ", " + to_string(year);
+		else if(dateFormat == Preferences::DateFormat::dmy)
+			str = weekday_str + ", " + to_string(day) + " " + month_str + " " + to_string(year);
 	}
 
 	return str;
@@ -76,24 +102,30 @@ const string &Date::ToString() const
 // Convert a date to the format in which it would be stated in conversation.
 string Date::LongString() const
 {
+
+	// yyyy-MM-DD, MM/DD/yyyy: Can you get this done by March 18th?
+	// DD/MM/yyyy: Can you get this done by the 18th of March?
+
 	if(!date)
 		return string();
 
+	string result;
+
 	int day = Day();
-	string result = "the " + to_string(day);
+
+	string dayString = to_string(day);
 	// All numbers in the teens add in "th", as do any numbers ending in 0 or in
 	// 4 through 9. Special endings are used for "1st", "2nd", and "3rd."
 	if(day / 10 == 1 || day % 10 == 0 || day % 10 > 3)
-		result += "th";
+		dayString += "th";
 	else if(day % 10 == 1)
-		result += "st";
+		dayString += "st";
 	else if(day % 10 == 2)
-		result += "nd";
+		dayString += "nd";
 	else
-		result += "rd";
+		dayString += "rd";
 
 	// Write out the month name instead of abbreviating it.
-	result += " of ";
 	static const string MONTH[] = {
 		"January",
 		"February",
@@ -108,7 +140,21 @@ string Date::LongString() const
 		"November",
 		"December"
 	};
-	result += MONTH[Month() - 1];
+	string month = MONTH[Month() - 1];
+
+	Preferences::DateFormat dateFormat = Preferences::GetDateFormat();
+	if(dateFormat == Preferences::DateFormat::ymd || dateFormat == Preferences::DateFormat::mdy)
+	{
+		result += month;
+		result += " ";
+		result += dayString;
+	}
+	else if(dateFormat == Preferences::DateFormat::dmy)
+	{
+		result += dayString;
+		result += " of ";
+		result += month;
+	}
 
 	return result;
 }

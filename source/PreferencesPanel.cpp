@@ -61,8 +61,7 @@ namespace {
 	const string SCROLL_SPEED = "Scroll speed";
 	const string FIGHTER_REPAIR = "Repair fighters in";
 	const string SHIP_OUTLINES = "Ship outlines in shops";
-
-	// How many pages of settings there are.
+	const string DATE_FORMAT = "Date format";
 	const int SETTINGS_PAGE_COUNT = 1;
 }
 
@@ -216,6 +215,8 @@ bool PreferencesPanel::Click(int x, int y, int clicks)
 					speed = 20;
 				Preferences::SetScrollSpeed(speed);
 			}
+			else if(zone.Value() == DATE_FORMAT)
+				Preferences::ToggleDateFormat();
 			// All other options are handled by just toggling the boolean state.
 			else
 				Preferences::Set(zone.Value(), !Preferences::Has(zone.Value()));
@@ -467,6 +468,7 @@ void PreferencesPanel::DrawSettings()
 		"Rotate flagship in HUD",
 		"Show planet labels",
 		"Show mini-map",
+		DATE_FORMAT,
 		"Always underline shortcuts",
 		"",
 		"AI",
@@ -566,6 +568,17 @@ void PreferencesPanel::DrawSettings()
 		}
 		else if(setting == EXPEND_AMMO)
 			text = Preferences::AmmoUsage();
+		else if(setting == DATE_FORMAT)
+		{
+			isOn = true;
+			Preferences::DateFormat datefmtShortName = Preferences::GetDateFormat();
+			if(datefmtShortName == Preferences::DateFormat::ymd)
+				text = "yyyy-mm-dd";
+			else if(datefmtShortName == Preferences::DateFormat::dmy)
+				text = "dd/mm/yyyy";
+			else if(datefmtShortName == Preferences::DateFormat::mdy)
+				text = "mm/dd/yyyy";
+		}
 		else if(setting == TURRET_TRACKING)
 		{
 			isOn = true;

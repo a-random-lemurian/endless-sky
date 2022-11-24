@@ -37,6 +37,10 @@ namespace {
 	const string EXPEND_AMMO = "Escorts expend ammo";
 	const string FRUGAL_ESCORTS = "Escorts use ammo frugally";
 
+	const string DATEFMT = "Date format";
+	const vector<string> DATEFMT_OPTIONS = {"dmy", "mdy", "ymd"};
+	int dateFormatIndex = 0;
+
 	const vector<double> ZOOMS = {.25, .35, .50, .70, 1.00, 1.40, 2.00};
 	int zoomIndex = 4;
 	constexpr double VOLUME_SCALE = .25;
@@ -91,6 +95,8 @@ void Preferences::Load()
 			vsyncIndex = max<int>(0, min<int>(node.Value(1), VSYNC_SETTINGS.size() - 1));
 		else if(node.Token(0) == "fullscreen")
 			screenModeIndex = max<int>(0, min<int>(node.Value(1), SCREEN_MODE_SETTINGS.size() - 1));
+		else if(node.Token(0) == "date format")
+			dateFormatIndex = max<int>(0, min<int>(node.Value(1), DATEFMT_OPTIONS.size() - 1));
 		else
 			settings[node.Token(0)] = (node.Size() == 1 || node.Value(1));
 	}
@@ -108,6 +114,7 @@ void Preferences::Save()
 	out.Write("scroll speed", scrollSpeed);
 	out.Write("view zoom", zoomIndex);
 	out.Write("vsync", vsyncIndex);
+	out.Write("date format", static_cast<int>(Preferences::GetDateFormat()));
 
 	for(const auto &it : settings)
 		out.Write(it.first, it.second);
@@ -143,6 +150,23 @@ void Preferences::ToggleAmmoUsage()
 string Preferences::AmmoUsage()
 {
 	return Has(EXPEND_AMMO) ? Has(FRUGAL_ESCORTS) ? "frugally" : "always" : "never";
+}
+
+
+
+void Preferences::ToggleDateFormat()
+{
+	if(dateFormatIndex == static_cast<int>(DATEFMT_OPTIONS.size() - 1))
+		dateFormatIndex = 0;
+	else
+		++dateFormatIndex;
+}
+
+
+
+Preferences::DateFormat Preferences::GetDateFormat()
+{
+	return static_cast<DateFormat>(dateFormatIndex);
 }
 
 
