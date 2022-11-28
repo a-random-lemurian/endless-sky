@@ -137,6 +137,8 @@ public:
 	bool HasShipyard() const;
 	// Check whether you can buy or sell ship outfits in this system.
 	bool HasOutfitter() const;
+	// Get the system's invisible fence radius.
+	double InvisibleFenceRadius() const;
 
 	// Get the specification of how many asteroids of each type there are.
 	const std::vector<Asteroid> &Asteroids() const;
@@ -234,6 +236,9 @@ private:
 
 	// Attributes, for use in location filters.
 	std::set<std::string> attributes;
+
+	// The "invisible fence" radius for this system.
+	double invisibleFenceRadius = 10000.;
 };
 
 

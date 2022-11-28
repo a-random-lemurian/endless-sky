@@ -284,7 +284,6 @@ namespace {
 		ship.SetTargetStellar(nullptr);
 	}
 
-	const double MAX_DISTANCE_FROM_CENTER = 10000.;
 	// Constants for the invisible fence timer.
 	const int FENCE_DECAY = 4;
 	const int FENCE_MAX = 600;
@@ -514,11 +513,17 @@ void AI::Step(const PlayerInfo &player, Command &activeCommands)
 			++it;
 	}
 	for(const auto &it : ships)
-		if(it->Position().Length() >= MAX_DISTANCE_FROM_CENTER)
-		{
-			int &value = fenceCount[&*it];
-			value = min(FENCE_MAX, value + FENCE_DECAY + 1);
-		}
+	{
+		// Skip carried fighters or drones.
+		if(!it->GetSystem())
+			continue;
+		else
+			if(it->Position().Length() >= it->GetSystem()->InvisibleFenceRadius())
+			{
+				int &value = fenceCount[&*it];
+				value = min(FENCE_MAX, value + FENCE_DECAY + 1);
+			}
+	}
 
 	const Ship *flagship = player.Flagship();
 	step = (step + 1) & 31;
@@ -1401,6 +1406,8 @@ bool AI::FollowOrders(Ship &ship, Command &command) const
 
 void AI::MoveIndependent(Ship &ship, Command &command) const
 {
+	double invisibleFenceRadius = ship.GetSystem()->InvisibleFenceRadius();
+
 	shared_ptr<const Ship> target = ship.GetTargetShip();
 	// NPCs should not be beyond the "fence" unless their target is
 	// fairly close to it (or they are intended to be there).
@@ -1409,7 +1416,7 @@ void AI::MoveIndependent(Ship &ship, Command &command) const
 		if(target)
 		{
 			Point extrapolated = target->Position() + 120. * (target->Velocity() - ship.Velocity());
-			if(extrapolated.Length() >= MAX_DISTANCE_FROM_CENTER)
+			if(extrapolated.Length() >= invisibleFenceRadius)
 			{
 				MoveTo(ship, command, Point(), Point(), 40., .8);
 				if(ship.Velocity().Dot(ship.Position()) > 0.)
@@ -1417,7 +1424,7 @@ void AI::MoveIndependent(Ship &ship, Command &command) const
 				return;
 			}
 		}
-		else if(ship.Position().Length() >= MAX_DISTANCE_FROM_CENTER)
+		else if(ship.Position().Length() >= invisibleFenceRadius)
 		{
 			// This ship should not be beyond the fence.
 			MoveTo(ship, command, Point(), Point(), 40, .8);
