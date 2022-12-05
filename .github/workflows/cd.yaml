@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - lem-fork
   pull_request:
     types:
       - synchronize
