@@ -1,6 +1,11 @@
 Welcome to Endless Sky!
 version 0.9.17-alpha
 
+This is the lem-fork branch
+of the game, containing
+Lemuria's modifications to
+the game.
+
 This game is open source.
 To report bugs, give feedback,
 or contribute to story writing,
