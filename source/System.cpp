@@ -974,10 +974,3 @@ void System::Price::Update()
 {
 	price = base + static_cast<int>(-100. * erf(supply / LIMIT));
 }
-
-
-
-double System::InvisibleFenceRadius() const
-{
-	return this->invisibleFenceRadius;
-}

@@ -520,6 +520,7 @@ void AI::Step(const PlayerInfo &player, Command &activeCommands)
 			int &value = fenceCount[&*it];
 			value = min(FENCE_MAX, value + FENCE_DECAY + 1);
 		}
+	}
 
 	const Ship *flagship = player.Flagship();
 	step = (step + 1) & 31;
