@@ -25,6 +25,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "PlayerInfo.h"
 #include "Point.h"
 #include "Random.h"
+#include "Logger.h"
 #include "UI.h"
 
 using namespace std;
@@ -57,6 +58,8 @@ void SpaceportPanel::UpdateNews()
 	if(!news)
 		return;
 	hasNews = true;
+
+	Logger::LogError(news->Name() + ": " + news->Message());
 
 	// Randomly pick which portrait, if any, is to be shown. Depending on if
 	// this news has a portrait, different interface information gets filled in.
