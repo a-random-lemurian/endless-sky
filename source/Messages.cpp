@@ -13,6 +13,7 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include "Logger.h"
 #include "Messages.h"
 
 #include <mutex>
@@ -32,6 +33,7 @@ namespace {
 void Messages::Add(const string &message, Importance importance)
 {
 	lock_guard<mutex> lock(incomingMutex);
+	Logger::LogError(message);
 	incoming.emplace_back(message, importance);
 }
 
