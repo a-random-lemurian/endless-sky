@@ -32,7 +32,7 @@ public:
 		dmy = 0,
 		mdy,
 		ymd
-	}
+	};
 
 	enum class AutoAim : int_fast8_t {
 		OFF = 0,
