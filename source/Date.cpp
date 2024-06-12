@@ -14,7 +14,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "Date.h"
-#include "Preferences.h"
 
 using namespace std;
 
@@ -33,20 +32,6 @@ namespace {
 		static const string DAY[] = {"Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"};
 		return DAY[day];
 	}
-
-	string ZeroPad(int i)
-	{
-		string s;
-
-		if(i < 10)
-			s += '0';
-
-		s += to_string(i);
-
-		return s;
-	}
-
-	Preferences::DateFormat dateFormatInUse = Preferences::DateFormat::dmy;
 
 	// Months contain a variable number of days.
 	const int MDAYS[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
@@ -77,7 +62,7 @@ const string &Date::ToString() const
 	}
 
 	// Because this is a somewhat "costly" operation, cache the result. The
-	// cached value is discarded if the date is changed.
+	// cached value is discarded if the date or date format is changed.
 	if(date && str.empty())
 	{
 		int day = Day();
@@ -85,17 +70,10 @@ const string &Date::ToString() const
 		int year = Year();
 
 		static const string MONTH[] = {
-				"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-
-		string weekday_str = Weekday(day, month, year);
-		string month_str = MONTH[month - 1];
-
-		if(dateFormat == Preferences::DateFormat::ymd)
-			str = to_string(year) + "-" + ZeroPad(month) + "-" + ZeroPad(day);
-		else if(dateFormat == Preferences::DateFormat::mdy)
-			str = weekday_str + " " + month_str + " " + to_string(day) + ", " + to_string(year);
-		else if(dateFormat == Preferences::DateFormat::dmy)
-			str = weekday_str + ", " + to_string(day) + " " + month_str + " " + to_string(year);
+			"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+		str.append(MONTH[month - 1]);
+		str.append(" ");
+		str.append(to_string(year));
 	}
 
 	return str;
@@ -116,8 +94,7 @@ string Date::LongString() const
 	string result;
 
 	int day = Day();
-
-	string dayString = to_string(day);
+	string result = "the " + to_string(day);
 	// All numbers in the teens add in "th", as do any numbers ending in 0 or in
 	// 4 through 9. Special endings are used for "1st", "2nd", and "3rd."
 	if(day / 10 == 1 || day % 10 == 0 || day % 10 > 3)
@@ -144,21 +121,7 @@ string Date::LongString() const
 		"November",
 		"December"
 	};
-	string month = MONTH[Month() - 1];
-
-	Preferences::DateFormat dateFormat = Preferences::GetDateFormat();
-	if(dateFormat == Preferences::DateFormat::ymd || dateFormat == Preferences::DateFormat::mdy)
-	{
-		result += month;
-		result += " ";
-		result += dayString;
-	}
-	else if(dateFormat == Preferences::DateFormat::dmy)
-	{
-		result += dayString;
-		result += " of ";
-		result += month;
-	}
+	result += MONTH[Month() - 1];
 
 	return result;
 }
