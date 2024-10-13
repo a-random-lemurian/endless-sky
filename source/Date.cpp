@@ -70,10 +70,17 @@ const string &Date::ToString() const
 		int year = Year();
 
 		static const string MONTH[] = {
-			"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-		str.append(MONTH[month - 1]);
-		str.append(" ");
-		str.append(to_string(year));
+				"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+
+		const string &weekdayStr = Weekday(day, month, year);
+		const string &monthStr = MONTH[month - 1];
+
+		if(dateFormat == Preferences::DateFormat::YMD)
+			str = to_string(year) + "-" + ZeroPad(month) + "-" + ZeroPad(day);
+		else if(dateFormat == Preferences::DateFormat::MDY)
+			str = weekdayStr + " " + monthStr + " " + to_string(day) + ", " + to_string(year);
+		else if(dateFormat == Preferences::DateFormat::DMY)
+			str = weekdayStr + ", " + to_string(day) + " " + monthStr + " " + to_string(year);
 	}
 
 	return str;
