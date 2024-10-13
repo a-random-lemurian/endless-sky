@@ -15,6 +15,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "Date.h"
 
+#include "Preferences.h"
+
 using namespace std;
 
 namespace {
@@ -33,9 +35,16 @@ namespace {
 		return DAY[day];
 	}
 
+	// Convert an integer to a string where single-digit integers have a leading zero.
+	string ZeroPad(int i)
+	{
+		return (i < 10 ? "0" : "") + to_string(i);
+	}
+
+	Preferences::DateFormat dateFormatInUse = Preferences::DateFormat::DMY;
+
 	// Months contain a variable number of days.
 	const int MDAYS[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
-
 }
 
 
@@ -91,17 +100,11 @@ const string &Date::ToString() const
 // Convert a date to the format in which it would be stated in conversation.
 string Date::LongString() const
 {
-
-	// yyyy-MM-DD, MM/DD/yyyy: Can you get this done by March 18th?
-	// DD/MM/yyyy: Can you get this done by the 18th of March?
-
 	if(!date)
 		return string();
 
-	string result;
-
 	int day = Day();
-	string result = "the " + to_string(day);
+	string dayString = to_string(day);
 	// All numbers in the teens add in "th", as do any numbers ending in 0 or in
 	// 4 through 9. Special endings are used for "1st", "2nd", and "3rd."
 	if(day / 10 == 1 || day % 10 == 0 || day % 10 > 3)
@@ -128,7 +131,14 @@ string Date::LongString() const
 		"November",
 		"December"
 	};
-	result += MONTH[Month() - 1];
+	const string &month = MONTH[Month() - 1];
+
+	Preferences::DateFormat dateFormat = Preferences::GetDateFormat();
+	string result;
+	if(dateFormat == Preferences::DateFormat::YMD || dateFormat == Preferences::DateFormat::MDY)
+		result += std::move(month) + " " + std::move(dayString);
+	else if(dateFormat == Preferences::DateFormat::DMY)
+		result += std::move(dayString) + " of " + std::move(month);
 
 	return result;
 }
